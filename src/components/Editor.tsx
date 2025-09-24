@@ -19,9 +19,10 @@ interface EditorProps {
   isPreview: boolean;
   onAnalysisUpdate: (analysis: AnalysisResult) => void;
   hoveredIssueType?: string | null;
+  analysis?: AnalysisResult | null;
 }
 
-export default function Editor({ value, onChange, isPreview, onAnalysisUpdate }: EditorProps) {
+export default function Editor({ value, onChange, isPreview, onAnalysisUpdate, hoveredIssueType, analysis }: EditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
 
@@ -57,6 +58,11 @@ export default function Editor({ value, onChange, isPreview, onAnalysisUpdate }:
         ]),
         markdown(),
         oneDark,
+        EditorView.theme({
+          '&': { height: '100%' },
+          '.cm-editor': { height: '100%' },
+          '.cm-scroller': { height: '100%' }
+        }),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             const newValue = update.state.doc.toString();
@@ -128,7 +134,7 @@ export default function Editor({ value, onChange, isPreview, onAnalysisUpdate }:
   if (isPreview) {
     return (
       <div className="h-full p-4 prose max-w-none overflow-auto bg-gray-50 text-black">
-        <div dangerouslySetInnerHTML={{ __html: renderMarkdown(value) }} />
+        <div dangerouslySetInnerHTML={{ __html: renderMarkdown(value, analysis, hoveredIssueType) }} />
       </div>
     );
   }
@@ -141,18 +147,39 @@ export default function Editor({ value, onChange, isPreview, onAnalysisUpdate }:
   );
 }
 
-function renderMarkdown(text: string): string {
+function getHighlightColor(type: string): string {
+  switch (type) {
+    case 'adverb': return '#DC2626'; // red-600
+    case 'passive': return '#EA580C'; // orange-600
+    case 'complex': return '#9333EA'; // purple-600
+    case 'qualifier': return '#16A34A'; // green-600
+    default: return '#2563EB'; // blue-600
+  }
+}
+
+function renderMarkdown(text: string, analysis?: AnalysisResult | null, hoveredIssueType?: string | null): string {
   // Simple markdown renderer - in real app, use a library
-  return text
-    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-    .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-    .replace(/\*(.*)\*/gim, '<em>$1</em>')
-    .replace(/!\[([^\]]*)\]\(([^)]*)\)/gim, '<img alt="$1" src="$2" />')
-    .replace(/\[([^\]]*)\]\(([^)]*)\)/gim, '<a href="$2">$1</a>')
-    .replace(/\n\n/gim, '</p><p>')
+  let processedText = text;
+  if (hoveredIssueType && analysis) {
+    const issues = analysis.issues.filter(i => i.type === hoveredIssueType);
+    for (const issue of issues) {
+      const escaped = issue.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const color = getHighlightColor(hoveredIssueType);
+      processedText = processedText.replace(new RegExp(escaped, 'g'), `<mark style="background-color: ${color}; color: white;">${issue.text}</mark>`);
+    }
+  }
+  return processedText
+    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold mt-6 mb-3">$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-8 mb-4">$1</h1>')
+    .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-gray-400 pl-4 italic text-gray-700 my-4">$1</blockquote>')
+    .replace(/^---$/gm, '<hr class="w-full border-t border-gray-300 my-4">')
+    .replace(/\*\*(.*)\*\*/gim, '<strong class="font-bold">$1</strong>')
+    .replace(/\*(.*)\*/gim, '<em class="italic">$1</em>')
+    .replace(/!\[([^\]]*)\]\(([^)]*)\)/gim, '<img alt="$1" src="$2" class="max-w-full h-auto" />')
+    .replace(/\[([^\]]*)\]\(([^)]*)\)/gim, '<a href="$2" class="text-blue-600 underline">$1</a>')
+    .replace(/\n\n/gim, '</p><p class="mb-4">')
     .replace(/\n/gim, '<br/>')
-    .replace(/^/, '<p>')
+    .replace(/^/, '<p class="mb-4">')
     .replace(/$/, '</p>');
 }

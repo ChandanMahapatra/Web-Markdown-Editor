@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { loadSettings, saveSettings } from '@/lib/storage';
 
 interface SettingsModalProps {
-  onClose: () => void;
+  onClose: (saved?: boolean) => void;
 }
 
 export default function SettingsModal({ onClose }: SettingsModalProps) {
@@ -19,10 +19,18 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
     loadSettings().then((loaded) => {
       if (loaded) {
         setSettings({
-          provider: loaded.provider || '',
+          provider: loaded.provider || 'lmstudio',
           model: loaded.model || '',
           apiKey: loaded.apiKey || '',
-          baseURL: loaded.baseURL || '',
+          baseURL: loaded.baseURL || 'http://192.168.4.222:1234/v1',
+        });
+      } else {
+        // Default values
+        setSettings({
+          provider: 'lmstudio',
+          model: '',
+          apiKey: '',
+          baseURL: 'http://192.168.4.222:1234/v1',
         });
       }
     });
@@ -30,7 +38,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
   const handleSave = async () => {
     await saveSettings(settings);
-    onClose();
+    onClose(true);
   };
 
   return (
@@ -56,51 +64,57 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-black mb-1">
-              Model
-            </label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-black"
-              value={settings.model}
-              onChange={(e) => setSettings({ ...settings, model: e.target.value })}
-              placeholder="Enter model name"
-            />
-          </div>
+          {settings.provider && settings.provider !== '' && (
+            <div>
+              <label className="block text-sm font-medium text-black mb-1">
+                Model
+              </label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                value={settings.model}
+                onChange={(e) => setSettings({ ...settings, model: e.target.value })}
+                placeholder="Enter model name"
+              />
+            </div>
+          )}
 
-          <div>
-            <label className="block text-sm font-medium text-black mb-1">
-              API Key
-            </label>
-            <input
-              type="password"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-black"
-              value={settings.apiKey}
-              onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
-              placeholder="Enter API key"
-            />
-          </div>
+          {(settings.provider === 'openai' || settings.provider === 'anthropic') && (
+            <div>
+              <label className="block text-sm font-medium text-black mb-1">
+                API Key
+              </label>
+              <input
+                type="password"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                value={settings.apiKey}
+                onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
+                placeholder="Enter API key"
+              />
+            </div>
+          )}
 
-          <div>
-            <label className="block text-sm font-medium text-black mb-1">
-              Base URL
-            </label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-black"
-              value={settings.baseURL}
-              onChange={(e) => setSettings({ ...settings, baseURL: e.target.value })}
-              placeholder="Enter base URL (e.g., http://localhost:1234)"
-            />
-          </div>
+          {(settings.provider === 'lmstudio' || settings.provider === 'ollama') && (
+            <div>
+              <label className="block text-sm font-medium text-black mb-1">
+                Base URL
+              </label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                value={settings.baseURL}
+                onChange={(e) => setSettings({ ...settings, baseURL: e.target.value })}
+                placeholder="Enter base URL (e.g., http://localhost:1234)"
+              />
+            </div>
+          )}
 
 
         </div>
 
         <div className="flex justify-end gap-2 mt-6">
           <button
-            onClick={onClose}
+            onClick={() => onClose()}
             className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
           >
             Cancel

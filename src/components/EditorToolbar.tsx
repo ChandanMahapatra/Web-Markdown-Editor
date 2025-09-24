@@ -11,12 +11,10 @@ export default function EditorToolbar({ onInsert }: EditorToolbarProps) {
     { label: 'H3', before: '### ', tooltip: 'Heading 3' },
     { label: 'Bold', before: '**', after: '**', tooltip: 'Bold' },
     { label: 'Italic', before: '*', after: '*', tooltip: 'Italic' },
-    { label: 'Code', before: '`', after: '`', tooltip: 'Inline Code' },
     { label: 'Link', before: '[', after: '](url)', tooltip: 'Link' },
     { label: 'List', before: '- ', tooltip: 'Bullet List' },
     { label: 'Numbered', before: '1. ', tooltip: 'Numbered List' },
     { label: 'Quote', before: '> ', tooltip: 'Quote' },
-    { label: 'Code Block', before: '```\n', after: '\n```', tooltip: 'Code Block' },
   ];
 
   return (

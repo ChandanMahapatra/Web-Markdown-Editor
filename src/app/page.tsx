@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Editor from '@/components/Editor';
 import AnalysisPanel from '@/components/AnalysisPanel';
 import SettingsModal from '@/components/SettingsModal';
 import { AnalysisResult } from '@/lib/analysis';
-import { EvaluationResult } from '@/lib/ai';
+import { EvaluationResult, getProviders, testConnection } from '@/lib/ai';
 import { downloadFile, markdownToHtml, exportToPdf } from '@/lib/export';
+import { loadSettings } from '@/lib/storage';
 
 export default function Home() {
   const [markdown, setMarkdown] = useState(`# Welcome to Markdown Editor
@@ -63,6 +64,28 @@ Feel free to edit this content or start fresh with your own writing!`);
   const [showExport, setShowExport] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [hoveredIssueType, setHoveredIssueType] = useState<string | null>(null);
+  const [aiStatus, setAiStatus] = useState<'disconnected' | 'connected' | 'connecting'>('disconnected');
+
+  const checkAIStatus = async () => {
+    const settings = await loadSettings();
+    if (!settings?.provider || settings.provider === '') {
+      setAiStatus('disconnected');
+      return;
+    }
+    setAiStatus('connecting');
+    const providers = await getProviders();
+    const provider = providers.find(p => p.id === settings.provider);
+    if (!provider) {
+      setAiStatus('disconnected');
+      return;
+    }
+    const connected = await testConnection(provider, settings.apiKey, settings.baseURL);
+    setAiStatus(connected ? 'connected' : 'disconnected');
+  };
+
+  useEffect(() => {
+    checkAIStatus();
+  }, []);
 
   const handleSave = async () => {
     // Save to IndexedDB
@@ -95,49 +118,49 @@ Feel free to edit this content or start fresh with your own writing!`);
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsPreview(!isPreview)}
-            className="px-3 py-1 bg-blue-500 text-black rounded hover:bg-blue-600"
+            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
             {isPreview ? 'Edit' : 'Preview'}
           </button>
           <button
             onClick={() => handleSave()}
-            className="px-3 py-1 bg-purple-500 text-black rounded hover:bg-purple-600"
+            className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600"
           >
             Save
           </button>
           <div className="relative">
             <button
               onClick={() => setShowExport(!showExport)}
-              className="px-3 py-1 bg-green-500 text-black rounded hover:bg-green-600"
+              className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
             >
               Export ▼
             </button>
             {showExport && (
-              <div className="absolute top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-10">
+              <div className="absolute top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[140px]">
                 <button
                   onClick={() => handleExport('md')}
-                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-black"
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-gray-100 text-black"
                 >
-                  Export as MD
+                  📄 Export as MD
                 </button>
                 <button
                   onClick={() => handleExport('html')}
-                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-black"
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-gray-100 text-black"
                 >
-                  Export as HTML
+                  🌐 Export as HTML
                 </button>
                 <button
                   onClick={() => handleExport('pdf')}
-                  className="block w-full px-4 py-2 text-left hover:bg-gray-100 text-black"
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-gray-100 text-black"
                 >
-                  Export as PDF
+                  📕 Export as PDF
                 </button>
               </div>
             )}
           </div>
           <button
             onClick={() => setShowSettings(true)}
-            className="px-3 py-1 bg-gray-500 text-black rounded hover:bg-gray-600"
+            className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
           >
             Settings
           </button>
@@ -153,6 +176,7 @@ Feel free to edit this content or start fresh with your own writing!`);
             isPreview={isPreview}
             onAnalysisUpdate={setAnalysis}
             hoveredIssueType={hoveredIssueType}
+            analysis={analysis}
           />
         </div>
         <div className="w-[30%] min-w-[420px] max-w-[420px]">
@@ -160,13 +184,14 @@ Feel free to edit this content or start fresh with your own writing!`);
             analysis={analysis}
             text={markdown}
             onHoverIssue={setHoveredIssueType}
+            aiStatus={aiStatus}
           />
         </div>
       </div>
 
       {/* Settings Modal */}
       {showSettings && (
-        <SettingsModal onClose={() => setShowSettings(false)} />
+        <SettingsModal onClose={(saved) => { if (saved) checkAIStatus(); setShowSettings(false); }} />
       )}
     </div>
   );
