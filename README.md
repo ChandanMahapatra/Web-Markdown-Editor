@@ -48,7 +48,7 @@ The app supports optional AI evaluation for grammar, clarity, and overall qualit
 
 ### Local AI with LM Studio
 
-For maximum privacy, use LM Studio to run AI models locally:
+For maximum privacy, use LM Studio to run AI models locally. **Note**: Local AI only works when running the app locally (npm run dev), not on the deployed GitHub Pages version due to HTTPS mixed content restrictions.
 
 1. **Download and Install LM Studio**: Get it from [https://lmstudio.ai/](https://lmstudio.ai/)
 
@@ -64,16 +64,19 @@ For maximum privacy, use LM Studio to run AI models locally:
    - Toggle CORS switch if necessary
    - Start the server
 
-4. **Configure in App**:
-   - Open the Web Markdown Editor
+4. **Run App Locally**:
+   - Use `npm run dev` to start the local development server
+   - Open http://localhost:3000
+
+5. **Configure in App**:
    - Go to Settings → AI Configuration
    - Select "LM Studio (Local)" as provider
-   - Add model name
+   - Add model name (e.g., "gemma-2-12b-it")
    - Base URL should be `http://localhost:1234/v1`
    - No API key required for local models
    - Test connection and save
 
-5. **Use AI Evaluation**:
+6. **Use AI Evaluation**:
    - Write or paste markdown text
    - Click "Evaluate with AI" in the Analysis panel
    - Get grammar, clarity scores and suggestions
@@ -86,6 +89,20 @@ The app also supports:
 - **Ollama**: Local models via Ollama (alternative to LM Studio)
 
 All AI evaluations are processed client-side or through direct API calls - no data is sent to external analytics services.
+
+### HTTPS Mixed Content Limitation
+
+**Important**: When the app is deployed on HTTPS (like GitHub Pages), it cannot connect to local HTTP servers due to browser security restrictions. This means:
+
+- ✅ **Local development** (`npm run dev`): Local AI works perfectly
+- ❌ **Deployed HTTPS version**: Local AI providers are automatically hidden
+- ✅ **Cloud providers** (OpenAI, Anthropic): Work on both local and deployed versions
+
+#### Workarounds for Using Local AI with Deployed App:
+
+1. **HTTPS Local Server**: Set up a reverse proxy (nginx/Caddy) with SSL certificates for your local AI server
+2. **mkcert**: Use mkcert to create local SSL certificates for LM Studio/Ollama
+3. **Development Mode**: Use the local development server for local AI features
 
 ## Architecture
 

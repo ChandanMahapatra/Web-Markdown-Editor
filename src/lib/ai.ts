@@ -27,9 +27,12 @@ export async function getProviders(): Promise<Provider[]> {
   if (providersCache) return providersCache;
 
   try {
-    // In a real implementation, fetch from https://ai-sdk.dev/providers/ai-sdk-providers
-    // For now, mock some providers
-    providersCache = [
+    // Check if we're in a deployed HTTPS environment
+    const isDeployedHTTPS = typeof window !== 'undefined' && 
+      window.location.protocol === 'https:' && 
+      window.location.hostname !== 'localhost';
+
+    const allProviders = [
       {
         id: 'openai',
         name: 'OpenAI',
@@ -59,6 +62,12 @@ export async function getProviders(): Promise<Provider[]> {
         models: ['llama2', 'codellama', 'mistral']
       }
     ];
+
+    // Filter out HTTP local providers when deployed on HTTPS
+    providersCache = isDeployedHTTPS 
+      ? allProviders.filter(p => !p.baseURL?.startsWith('http://'))
+      : allProviders;
+
     return providersCache;
   } catch (error) {
     console.error('Failed to fetch providers:', error);
