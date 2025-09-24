@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnalysisResult } from '@/lib/analysis';
 import { EvaluationResult, evaluateText, getProviders } from '@/lib/ai';
+import { loadSettings } from '@/lib/storage';
 
 interface AnalysisPanelProps {
   analysis: AnalysisResult | null;
@@ -19,13 +20,22 @@ export default function AnalysisPanel({ analysis, text, onHoverIssue }: Analysis
 
     setIsEvaluating(true);
     try {
-      // For now, use mock provider
+      const settings = await loadSettings();
+      if (!settings?.provider) {
+        alert('Please select an AI provider in settings.');
+        return;
+      }
       const providers = await getProviders();
-      const provider = providers[0]; // OpenAI as default
-      const result = await evaluateText(text, provider, provider.models[0]);
+      const provider = providers.find(p => p.id === settings.provider);
+      if (!provider) {
+        alert('Provider not found.');
+        return;
+      }
+      const result = await evaluateText(text, provider, settings.model || provider.models[0], settings.apiKey, settings.baseURL);
       setEvaluation(result);
     } catch (error) {
       console.error('Evaluation failed:', error);
+      alert('Evaluation failed. Check your settings and try again.');
     } finally {
       setIsEvaluating(false);
     }

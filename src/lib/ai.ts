@@ -1,3 +1,7 @@
+import { generateText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { anthropic } from '@ai-sdk/anthropic';
+
 export interface Provider {
   id: string;
   name: string;
@@ -42,14 +46,14 @@ export async function getProviders(): Promise<Provider[]> {
         id: 'lmstudio',
         name: 'LM Studio (Local)',
         apiKeyRequired: false,
-        baseURL: 'http://localhost:1234',
+        baseURL: 'http://localhost:1234/v1',
         models: ['local-model']
       },
       {
         id: 'ollama',
         name: 'Ollama (Local)',
         apiKeyRequired: false,
-        baseURL: 'http://localhost:11434',
+        baseURL: 'http://localhost:11434/v1',
         models: ['llama2', 'codellama', 'mistral']
       }
     ];
@@ -64,29 +68,106 @@ export async function evaluateText(
   text: string,
   provider: Provider,
   model: string,
-  apiKey?: string
+  apiKey?: string,
+  baseURL?: string
 ): Promise<EvaluationResult> {
-  // Mock implementation - in real app, call the provider's API
-  await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+  const effectiveBaseURL = baseURL || provider.baseURL;
 
-  // Simple mock scoring
-  const wordCount = text.split(/\s+/).length;
-  const grammar = Math.min(100, 80 + Math.random() * 20);
-  const clarity = Math.max(0, 100 - wordCount / 10);
-  const overall = (grammar + clarity) / 2;
+  if (provider.id === 'anthropic') {
+    const aiModel = anthropic(model, { apiKey: apiKey || '' });
+    const result = await generateText({
+      model: aiModel,
+      prompt: `Evaluate the following markdown text for grammar, clarity, and overall quality. Provide scores out of 100 and up to 3 suggestions for improvement.
 
-  const suggestions = [
-    'Consider using more active voice.',
-    'Some sentences are quite long.',
-    'Try to vary your sentence structure.'
-  ];
+Format your response exactly like this:
+Grammar: [score]
+Clarity: [score]
+Overall: [score]
+Suggestions:
+- [suggestion1]
+- [suggestion2]
+- [suggestion3]
+
+Text:
+${text}`,
+    });
+    return parseEvaluationResponse(result.text);
+  } else {
+    // Direct API call for OpenAI-compatible providers
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (apiKey && apiKey.trim()) {
+      headers['Authorization'] = `Bearer ${apiKey}`;
+    }
+
+    const response = await fetch(`${effectiveBaseURL}/chat/completions`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: 'user',
+            content: `Evaluate the following markdown text for grammar, clarity, and overall quality. Provide scores out of 100 and up to 3 suggestions for improvement.
+
+Format your response exactly like this:
+Grammar: [score]
+Clarity: [score]
+Overall: [score]
+Suggestions:
+- [suggestion1]
+- [suggestion2]
+- [suggestion3]
+
+Text:
+${text}`,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 500,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || '';
+    return parseEvaluationResponse(content);
+  }
+}
+
+function parseEvaluationResponse(response: string): EvaluationResult {
+  const lines = response.split('\n').map(line => line.trim());
+
+  let grammar = 0;
+  let clarity = 0;
+  let overall = 0;
+  const suggestions: string[] = [];
+
+  let inSuggestions = false;
+  for (const line of lines) {
+    if (line.toLowerCase().startsWith('grammar:')) {
+      grammar = parseInt(line.split(':')[1]?.trim() || '0') || 0;
+    } else if (line.toLowerCase().startsWith('clarity:')) {
+      clarity = parseInt(line.split(':')[1]?.trim() || '0') || 0;
+    } else if (line.toLowerCase().startsWith('overall:')) {
+      overall = parseInt(line.split(':')[1]?.trim() || '0') || 0;
+    } else if (line.toLowerCase().startsWith('suggestions:')) {
+      inSuggestions = true;
+    } else if (inSuggestions && line.startsWith('-')) {
+      suggestions.push(line.substring(1).trim());
+    }
+  }
 
   return {
     scores: {
-      grammar: Math.round(grammar),
-      clarity: Math.round(clarity),
-      overall: Math.round(overall)
+      grammar: Math.max(0, Math.min(100, grammar)),
+      clarity: Math.max(0, Math.min(100, clarity)),
+      overall: Math.max(0, Math.min(100, overall)),
     },
-    suggestions
+    suggestions,
   };
 }

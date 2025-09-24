@@ -12,6 +12,7 @@ interface Settings {
   provider?: string;
   model?: string;
   apiKey?: string;
+  baseURL?: string;
 }
 
 interface MyDB extends DBSchema {
