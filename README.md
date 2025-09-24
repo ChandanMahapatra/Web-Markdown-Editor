@@ -1,6 +1,7 @@
 # Web Markdown Editor
 
-<img width="1280" height="800" alt="Screen Shot 2025-09-24 at 10 55 27" src="https://github.com/user-attachments/assets/d5e14e58-b737-4caf-a5e6-cf82c6b58a74" />
+<img width="1280" height="800" alt="Screen Shot 2025-09-24 at 15 33 31" src="https://github.com/user-attachments/assets/3e8e325e-ab50-4ce5-b98e-b8f8767c91b1" />
+
 
 A privacy-first, local-first single-page Next.js markdown editor that runs entirely in the browser. This app was "vibe coded" with AI assistance, emphasizing privacy and local processing. Features instant local analysis, optional AI evaluation via configurable providers (including local models), and static export for GitHub Pages deployment.
 
