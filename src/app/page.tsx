@@ -65,6 +65,8 @@ Feel free to edit this content or start fresh with your own writing!`);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [hoveredIssueType, setHoveredIssueType] = useState<string | null>(null);
   const [aiStatus, setAiStatus] = useState<'disconnected' | 'connected' | 'connecting'>('disconnected');
+  const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const checkAIStatus = async () => {
     const settings = await loadSettings();
@@ -85,7 +87,21 @@ Feel free to edit this content or start fresh with your own writing!`);
 
   useEffect(() => {
     checkAIStatus();
+    // Set initial theme based on system preference
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDark(mediaQuery.matches);
+    setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
 
   const handleSave = async () => {
     // Save to IndexedDB
@@ -111,47 +127,47 @@ Feel free to edit this content or start fresh with your own writing!`);
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-[var(--color-background-secondary)]">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-black">Markdown Editor</h1>
+      <header className="bg-[var(--color-background-primary)] border-b border-[var(--color-border-primary)] px-4 py-2 flex items-center justify-between">
+        <h1 className="text-xl font-semibold text-[var(--color-text-primary)]">Markdown Editor</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsPreview(!isPreview)}
-            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="px-3 py-1 bg-[var(--color-accent-primary)] text-[var(--color-accent-text)] rounded hover:bg-[var(--color-accent-hover)]"
           >
             {isPreview ? 'Edit' : 'Preview'}
           </button>
           <button
             onClick={() => handleSave()}
-            className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600"
+            className="px-3 py-1 bg-[var(--color-status-success)] text-[var(--color-accent-text)] rounded hover:bg-[var(--color-status-warning)]"
           >
             Save
           </button>
           <div className="relative">
             <button
               onClick={() => setShowExport(!showExport)}
-              className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+              className="px-3 py-1 bg-[var(--color-status-success)] text-[var(--color-accent-text)] rounded hover:bg-[var(--color-status-warning)]"
             >
               Export ▼
             </button>
             {showExport && (
-              <div className="absolute top-full mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 min-w-[140px]">
+              <div className="absolute top-full mt-1 bg-[var(--color-background-primary)] border border-[var(--color-border-primary)] rounded shadow-lg z-10 min-w-[140px]">
                 <button
                   onClick={() => handleExport('md')}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-gray-100 text-black"
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-[var(--color-background-tertiary)] text-[var(--color-text-primary)]"
                 >
                   📄 Export as MD
                 </button>
                 <button
                   onClick={() => handleExport('html')}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-gray-100 text-black"
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-[var(--color-background-tertiary)] text-[var(--color-text-primary)]"
                 >
                   🌐 Export as HTML
                 </button>
                 <button
                   onClick={() => handleExport('pdf')}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-gray-100 text-black"
+                  className="flex items-center gap-2 w-full px-4 py-2 text-left hover:bg-[var(--color-background-tertiary)] text-[var(--color-text-primary)]"
                 >
                   📕 Export as PDF
                 </button>
@@ -159,8 +175,14 @@ Feel free to edit this content or start fresh with your own writing!`);
             )}
           </div>
           <button
+            onClick={() => setIsDark(!isDark)}
+            className="px-3 py-1 bg-[var(--color-text-secondary)] text-[var(--color-accent-text)] rounded hover:bg-[var(--color-text-disabled)]"
+          >
+            {isDark ? 'Light' : 'Dark'}
+          </button>
+          <button
             onClick={() => setShowSettings(true)}
-            className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
+            className="px-3 py-1 bg-[var(--color-text-secondary)] text-[var(--color-accent-text)] rounded hover:bg-[var(--color-text-disabled)]"
           >
             Settings
           </button>
@@ -171,6 +193,7 @@ Feel free to edit this content or start fresh with your own writing!`);
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 min-w-0">
           <Editor
+            key={isDark ? 'dark' : 'light'}
             value={markdown}
             onChange={setMarkdown}
             isPreview={isPreview}

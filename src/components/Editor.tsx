@@ -3,15 +3,22 @@
 import { useEffect, useRef } from 'react';
 import { EditorView, keymap, highlightSpecialChars, drawSelection, highlightActiveLine, dropCursor, rectangularSelection, crosshairCursor, highlightActiveLineGutter, Decoration, DecorationSet, ViewPlugin, ViewUpdate } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
-import { foldGutter, indentOnInput, syntaxHighlighting, defaultHighlightStyle, bracketMatching, foldKeymap } from '@codemirror/language';
+import { foldGutter, indentOnInput, syntaxHighlighting, bracketMatching, foldKeymap, HighlightStyle } from '@codemirror/language';
+import { tags } from '@lezer/highlight';
 import { history, defaultKeymap, historyKeymap } from '@codemirror/commands';
 import { searchKeymap, highlightSelectionMatches } from '@codemirror/search';
 import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { markdown } from '@codemirror/lang-markdown';
-import { oneDark } from '@codemirror/theme-one-dark';
-import { indentWithTab } from '@codemirror/commands';
 import { analyzeText, AnalysisResult } from '@/lib/analysis';
 import EditorToolbar from './EditorToolbar';
+
+const customHighlightStyle = HighlightStyle.define([
+  { tag: tags.keyword, color: 'var(--color-syntax-keyword)' },
+  { tag: tags.string, color: 'var(--color-syntax-string)' },
+  { tag: tags.comment, color: 'var(--color-syntax-comment)' },
+  { tag: tags.variableName, color: 'var(--color-syntax-variable)' },
+  { tag: tags.operator, color: 'var(--color-syntax-operator)' },
+]);
 
 interface EditorProps {
   value: string;
@@ -40,7 +47,7 @@ export default function Editor({ value, onChange, isPreview, onAnalysisUpdate, h
         dropCursor(),
         EditorState.allowMultipleSelections.of(true),
         indentOnInput(),
-        syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+        syntaxHighlighting(customHighlightStyle, { fallback: true }),
         bracketMatching(),
         closeBrackets(),
         autocompletion(),
@@ -57,12 +64,37 @@ export default function Editor({ value, onChange, isPreview, onAnalysisUpdate, h
           ...completionKeymap,
         ]),
         markdown(),
-        oneDark,
         EditorView.theme({
-          '&': { height: '100%' },
+          '&': {
+            height: '100%',
+            backgroundColor: 'var(--color-background-primary)',
+            color: 'var(--color-text-primary)',
+            fontSize: '16px',
+            fontFamily: 'Inter',
+          },
           '.cm-editor': { height: '100%' },
-          '.cm-scroller': { height: '100%' }
+          '.cm-scroller': { height: '100%' },
+          '.cm-content': { whiteSpace: 'pre-wrap' },
+          '.cm-gutters': {
+            backgroundColor: 'var(--color-background-secondary)',
+            color: 'var(--color-text-secondary)',
+            border: 'none'
+          },
+          '.cm-activeLineGutter': {
+            backgroundColor: 'var(--color-background-tertiary)',
+          },
+          '.cm-activeLine': {
+            backgroundColor: 'var(--color-background-tertiary)',
+          },
+          '.cm-selectionBackground': {
+            backgroundColor: 'var(--color-accent-primary) !important',
+            opacity: 0.3,
+          },
+          '.cm-focused': {
+            outline: 'none',
+          },
         }),
+        EditorView.lineWrapping,
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             const newValue = update.state.doc.toString();
@@ -133,7 +165,7 @@ export default function Editor({ value, onChange, isPreview, onAnalysisUpdate, h
 
   if (isPreview) {
     return (
-      <div className="h-full p-4 prose max-w-none overflow-auto bg-gray-50 text-black">
+      <div className="h-full p-4 prose max-w-none overflow-auto bg-[var(--color-background-secondary)] text-[var(--color-text-primary)]" style={{ fontFamily: 'Inter' }}>
         <div dangerouslySetInnerHTML={{ __html: renderMarkdown(value, analysis, hoveredIssueType) }} />
       </div>
     );
@@ -169,17 +201,17 @@ function renderMarkdown(text: string, analysis?: AnalysisResult | null, hoveredI
     }
   }
   return processedText
-    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold mt-6 mb-3">$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-8 mb-4">$1</h1>')
-    .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-gray-400 pl-4 italic text-gray-700 my-4">$1</blockquote>')
-    .replace(/^---$/gm, '<hr class="w-full border-t border-gray-300 my-4">')
-    .replace(/\*\*(.*)\*\*/gim, '<strong class="font-bold">$1</strong>')
-    .replace(/\*(.*)\*/gim, '<em class="italic">$1</em>')
+    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-4 mb-2 text-[var(--color-text-primary)]">$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold mt-6 mb-3 text-[var(--color-text-primary)]">$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-8 mb-4 text-[var(--color-text-primary)]">$1</h1>')
+    .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-[var(--color-border-primary)] pl-4 italic text-[var(--color-text-secondary)] my-4">$1</blockquote>')
+    .replace(/^---$/gm, '<hr class="w-full border-t border-[var(--color-border-primary)] my-4">')
+    .replace(/\*\*(.*)\*\*/gim, '<strong class="font-bold text-[var(--color-text-primary)]">$1</strong>')
+    .replace(/\*(.*)\*/gim, '<em class="italic text-[var(--color-text-primary)]">$1</em>')
     .replace(/!\[([^\]]*)\]\(([^)]*)\)/gim, '<img alt="$1" src="$2" class="max-w-full h-auto" />')
-    .replace(/\[([^\]]*)\]\(([^)]*)\)/gim, '<a href="$2" class="text-blue-600 underline">$1</a>')
-    .replace(/\n\n/gim, '</p><p class="mb-4">')
+    .replace(/\[([^\]]*)\]\(([^)]*)\)/gim, '<a href="$2" class="text-[var(--color-accent-primary)] underline">$1</a>')
+    .replace(/\n\n/gim, '</p><p class="mb-4 text-[var(--color-text-primary)]">')
     .replace(/\n/gim, '<br/>')
-    .replace(/^/, '<p class="mb-4">')
+    .replace(/^/, '<p class="mb-4 text-[var(--color-text-primary)]">')
     .replace(/$/, '</p>');
 }

@@ -18,12 +18,12 @@ export default function EditorToolbar({ onInsert }: EditorToolbarProps) {
   ];
 
   return (
-    <div className="bg-gray-100 border-b border-gray-200 px-4 py-2 flex flex-wrap gap-1">
+    <div className="bg-[var(--color-background-secondary)] border-b border-[var(--color-border-primary)] px-4 py-2 flex flex-wrap gap-1">
       {actions.map((action) => (
         <button
           key={action.label}
           onClick={() => onInsert(action.before, action.after)}
-          className="px-3 py-1 bg-white border border-gray-300 rounded text-sm text-black hover:bg-gray-50 hover:border-gray-400 transition-colors"
+          className="px-3 py-1 bg-[var(--color-background-primary)] border border-[var(--color-border-primary)] rounded text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-background-tertiary)] hover:border-[var(--color-accent-primary)] transition-colors"
           title={action.tooltip}
         >
           {action.label}

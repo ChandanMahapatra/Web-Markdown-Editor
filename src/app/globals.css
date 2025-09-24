@@ -1,28 +1,159 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Neutral colors - Light theme */
+  --color-background-primary: #FFFFFF;
+  --color-background-secondary: #F5F5F5;
+  --color-background-tertiary: #EEEEEE;
+  --color-text-primary: #222222;
+  --color-text-secondary: #666666;
+  --color-text-disabled: #CCCCCC;
+  --color-border-primary: #E0E0E0;
+  --color-border-secondary: #F0F0F0;
+
+  /* Accent colors - Light theme */
+  --color-accent-primary: #007AFF;
+  --color-accent-hover: #005CFF;
+  --color-accent-text: #FFFFFF;
+
+  /* Status colors - Light theme */
+  --color-status-success: #28A745;
+  --color-status-warning: #FFC107;
+  --color-status-error: #DC3545;
+
+  /* Syntax highlighting - Light theme */
+  --color-syntax-keyword: #0070C1;
+  --color-syntax-string: #D14539;
+  --color-syntax-comment: #888888;
+  --color-syntax-variable: #0070C1;
+  --color-syntax-operator: #000000;
+
+  /* Backward compatibility */
+  --background: var(--color-background-primary);
+  --foreground: var(--color-text-primary);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Inter';
+  --font-mono: 'Inter';
+  --font-preview: 'Inter';
+}
+
+.light {
+  /* Neutral colors - Light theme */
+  --color-background-primary: #FFFFFF;
+  --color-background-secondary: #F5F5F5;
+  --color-background-tertiary: #EEEEEE;
+  --color-text-primary: #222222;
+  --color-text-secondary: #666666;
+  --color-text-disabled: #CCCCCC;
+  --color-border-primary: #E0E0E0;
+  --color-border-secondary: #F0F0F0;
+
+  /* Accent colors - Light theme */
+  --color-accent-primary: #007AFF;
+  --color-accent-hover: #005CFF;
+  --color-accent-text: #FFFFFF;
+
+  /* Status colors - Light theme */
+  --color-status-success: #28A745;
+  --color-status-warning: #FFC107;
+  --color-status-error: #DC3545;
+
+  /* Syntax highlighting - Light theme */
+  --color-syntax-keyword: #0070C1;
+  --color-syntax-string: #D14539;
+  --color-syntax-comment: #888888;
+  --color-syntax-variable: #0070C1;
+  --color-syntax-operator: #000000;
+
+  /* Backward compatibility */
+  --background: var(--color-background-primary);
+  --foreground: var(--color-text-primary);
+}
+
+.dark {
+  /* Neutral colors - Dark theme */
+  --color-background-primary: #1E1E1E;
+  --color-background-secondary: #282828;
+  --color-background-tertiary: #333333;
+  --color-text-primary: #F0F0F0;
+  --color-text-secondary: #B0B0B0;
+  --color-text-disabled: #666666;
+  --color-border-primary: #444444;
+  --color-border-secondary: #333333;
+
+  /* Accent colors - Dark theme */
+  --color-accent-primary: #5097FF;
+  --color-accent-hover: #3D80E3;
+  --color-accent-text: #1E1E1E;
+
+  /* Status colors - Dark theme */
+  --color-status-success: #4CAF50;
+  --color-status-warning: #FFC107;
+  --color-status-error: #EF5350;
+
+  /* Syntax highlighting - Dark theme */
+  --color-syntax-keyword: #569CD6;
+  --color-syntax-string: #CE9178;
+  --color-syntax-comment: #6A9955;
+  --color-syntax-variable: #9CDCFE;
+  --color-syntax-operator: #C8C8C8;
+
+  /* Backward compatibility */
+  --background: var(--color-background-primary);
+  --foreground: var(--color-text-primary);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not(.light) {
+    /* Neutral colors - Dark theme */
+    --color-background-primary: #1E1E1E;
+    --color-background-secondary: #282828;
+    --color-background-tertiary: #333333;
+    --color-text-primary: #F0F0F0;
+    --color-text-secondary: #B0B0B0;
+    --color-text-disabled: #666666;
+    --color-border-primary: #444444;
+    --color-border-secondary: #333333;
+
+    /* Accent colors - Dark theme */
+    --color-accent-primary: #5097FF;
+    --color-accent-hover: #3D80E3;
+    --color-accent-text: #1E1E1E;
+
+    /* Status colors - Dark theme */
+    --color-status-success: #4CAF50;
+    --color-status-warning: #FFC107;
+    --color-status-error: #EF5350;
+
+    /* Syntax highlighting - Dark theme */
+    --color-syntax-keyword: #569CD6;
+    --color-syntax-string: #CE9178;
+    --color-syntax-comment: #6A9955;
+    --color-syntax-variable: #9CDCFE;
+    --color-syntax-operator: #C8C8C8;
+
+    /* Backward compatibility */
+    --background: var(--color-background-primary);
+    --foreground: var(--color-text-primary);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter';
   overflow-x: hidden;
   margin: 0;
   padding: 0;

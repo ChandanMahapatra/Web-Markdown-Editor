@@ -42,17 +42,17 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-96 max-w-full">
-        <h2 className="text-xl font-semibold mb-4 text-black">Settings</h2>
+    <div className="fixed inset-0 bg-[var(--color-background-primary)] bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-[var(--color-background-primary)] border border-[var(--color-border-primary)] rounded-lg p-6 w-96 max-w-full">
+        <h2 className="text-xl font-semibold mb-4 text-[var(--color-text-primary)]">Settings</h2>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-black mb-1">
+            <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
               AI Provider
             </label>
             <select
-              className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+              className="w-full border border-[var(--color-border-primary)] rounded px-3 py-2 text-[var(--color-text-primary)] bg-[var(--color-background-primary)]"
               value={settings.provider}
               onChange={(e) => setSettings({ ...settings, provider: e.target.value })}
             >
@@ -66,12 +66,12 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
           {settings.provider && settings.provider !== '' && (
             <div>
-              <label className="block text-sm font-medium text-black mb-1">
+              <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
                 Model
               </label>
               <input
                 type="text"
-                className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                className="w-full border border-[var(--color-border-primary)] rounded px-3 py-2 text-[var(--color-text-primary)] bg-[var(--color-background-primary)]"
                 value={settings.model}
                 onChange={(e) => setSettings({ ...settings, model: e.target.value })}
                 placeholder="Enter model name"
@@ -81,12 +81,12 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
           {(settings.provider === 'openai' || settings.provider === 'anthropic') && (
             <div>
-              <label className="block text-sm font-medium text-black mb-1">
+              <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
                 API Key
               </label>
               <input
                 type="password"
-                className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                className="w-full border border-[var(--color-border-primary)] rounded px-3 py-2 text-[var(--color-text-primary)] bg-[var(--color-background-primary)]"
                 value={settings.apiKey}
                 onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
                 placeholder="Enter API key"
@@ -96,12 +96,12 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
           {(settings.provider === 'lmstudio' || settings.provider === 'ollama') && (
             <div>
-              <label className="block text-sm font-medium text-black mb-1">
+              <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
                 Base URL
               </label>
               <input
                 type="text"
-                className="w-full border border-gray-300 rounded px-3 py-2 text-black"
+                className="w-full border border-[var(--color-border-primary)] rounded px-3 py-2 text-[var(--color-text-primary)] bg-[var(--color-background-primary)]"
                 value={settings.baseURL}
                 onChange={(e) => setSettings({ ...settings, baseURL: e.target.value })}
                 placeholder="Enter base URL (e.g., http://localhost:1234)"
@@ -115,13 +115,13 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
         <div className="flex justify-end gap-2 mt-6">
           <button
             onClick={() => onClose()}
-            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+            className="px-4 py-2 bg-[var(--color-text-secondary)] text-[var(--color-accent-text)] rounded hover:bg-[var(--color-text-disabled)]"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="px-4 py-2 bg-[var(--color-accent-primary)] text-[var(--color-accent-text)] rounded hover:bg-[var(--color-accent-hover)]"
           >
             Save
           </button>
