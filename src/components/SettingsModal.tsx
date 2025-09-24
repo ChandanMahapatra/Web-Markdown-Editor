@@ -8,14 +8,14 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-96 max-w-full">
-        <h2 className="text-xl font-semibold mb-4">Settings</h2>
+        <h2 className="text-xl font-semibold mb-4 text-black">Settings</h2>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-black mb-1">
               AI Provider
             </label>
-            <select className="w-full border border-gray-300 rounded px-3 py-2">
+            <select className="w-full border border-gray-300 rounded px-3 py-2 text-black">
               <option value="">None (Local only)</option>
               <option value="openai">OpenAI</option>
               <option value="anthropic">Anthropic</option>
@@ -24,12 +24,12 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-black mb-1">
               API Key
             </label>
             <input
               type="password"
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-black"
               placeholder="Enter API key"
             />
           </div>

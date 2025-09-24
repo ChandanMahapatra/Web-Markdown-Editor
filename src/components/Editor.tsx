@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { EditorView, keymap, highlightSpecialChars, drawSelection, highlightActiveLine, dropCursor, rectangularSelection, crosshairCursor, highlightActiveLineGutter } from '@codemirror/view';
+import { EditorView, keymap, highlightSpecialChars, drawSelection, highlightActiveLine, dropCursor, rectangularSelection, crosshairCursor, highlightActiveLineGutter, Decoration, DecorationSet, ViewPlugin, ViewUpdate } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { foldGutter, indentOnInput, syntaxHighlighting, defaultHighlightStyle, bracketMatching, foldKeymap } from '@codemirror/language';
 import { history, defaultKeymap, historyKeymap } from '@codemirror/commands';
@@ -9,6 +9,7 @@ import { searchKeymap, highlightSelectionMatches } from '@codemirror/search';
 import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { markdown } from '@codemirror/lang-markdown';
 import { oneDark } from '@codemirror/theme-one-dark';
+import { indentWithTab } from '@codemirror/commands';
 import { analyzeText, AnalysisResult } from '@/lib/analysis';
 import EditorToolbar from './EditorToolbar';
 
@@ -17,6 +18,7 @@ interface EditorProps {
   onChange: (value: string) => void;
   isPreview: boolean;
   onAnalysisUpdate: (analysis: AnalysisResult) => void;
+  hoveredIssueType?: string | null;
 }
 
 export default function Editor({ value, onChange, isPreview, onAnalysisUpdate }: EditorProps) {
@@ -125,7 +127,7 @@ export default function Editor({ value, onChange, isPreview, onAnalysisUpdate }:
 
   if (isPreview) {
     return (
-      <div className="h-full p-4 prose max-w-none overflow-auto">
+      <div className="h-full p-4 prose max-w-none overflow-auto bg-gray-50 text-black">
         <div dangerouslySetInnerHTML={{ __html: renderMarkdown(value) }} />
       </div>
     );

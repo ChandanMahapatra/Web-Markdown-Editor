@@ -62,6 +62,7 @@ Feel free to edit this content or start fresh with your own writing!`);
   const [showSettings, setShowSettings] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [hoveredIssueType, setHoveredIssueType] = useState<string | null>(null);
 
   const handleSave = async () => {
     // Save to IndexedDB
@@ -151,10 +152,15 @@ Feel free to edit this content or start fresh with your own writing!`);
             onChange={setMarkdown}
             isPreview={isPreview}
             onAnalysisUpdate={setAnalysis}
+            hoveredIssueType={hoveredIssueType}
           />
         </div>
         <div className="w-[30%] min-w-[420px] max-w-[420px]">
-          <AnalysisPanel analysis={analysis} text={markdown} />
+          <AnalysisPanel
+            analysis={analysis}
+            text={markdown}
+            onHoverIssue={setHoveredIssueType}
+          />
         </div>
       </div>
 

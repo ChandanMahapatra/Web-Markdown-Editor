@@ -7,9 +7,10 @@ import { EvaluationResult, evaluateText, getProviders } from '@/lib/ai';
 interface AnalysisPanelProps {
   analysis: AnalysisResult | null;
   text: string;
+  onHoverIssue?: (type: string | null) => void;
 }
 
-export default function AnalysisPanel({ analysis, text }: AnalysisPanelProps) {
+export default function AnalysisPanel({ analysis, text, onHoverIssue }: AnalysisPanelProps) {
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
 
@@ -52,27 +53,51 @@ export default function AnalysisPanel({ analysis, text }: AnalysisPanelProps) {
             <div>Sentences: {analysis.sentenceCount}</div>
             <div>Paragraphs: {analysis.paragraphCount}</div>
             <div>Reading Time: {analysis.readingTime.toFixed(1)} min</div>
-            <div>Flesch Score: {analysis.fleschScore.toFixed(1)}</div>
+            <div>
+              Flesch Score: {analysis.fleschScore.toFixed(1)}{' '}
+              <a
+                href="https://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 text-xs"
+              >
+                (?)
+              </a>
+            </div>
           </div>
         </div>
 
         <div>
-          <h3 className="font-medium text-sm text-black">Issues ({analysis.issues.length})</h3>
-          <div className="mt-2 space-y-2">
-            {analysis.issues.slice(0, 10).map((issue, index) => (
-              <div key={index} className="border border-gray-200 rounded p-2 text-xs">
-                <div className="font-medium capitalize text-black">{issue.type}</div>
-                <div className="text-black">&ldquo;{issue.text}&rdquo;</div>
-                {issue.suggestion && (
-                  <div className="text-blue-600 mt-1">{issue.suggestion}</div>
+          <h3 className="font-medium text-sm text-black mb-3">Issues</h3>
+          <div className="space-y-3">
+            {Object.entries(
+              analysis.issues.reduce((acc, issue) => {
+                if (!acc[issue.type]) acc[issue.type] = [];
+                acc[issue.type].push(issue);
+                return acc;
+              }, {} as Record<string, typeof analysis.issues>)
+            ).map(([type, issues]) => (
+              <div
+                key={type}
+                className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                onMouseEnter={() => onHoverIssue?.(type)}
+                onMouseLeave={() => onHoverIssue?.(null)}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium capitalize text-black text-sm">{type}</span>
+                  <span className="text-lg font-bold text-blue-600">{issues.length}</span>
+                </div>
+                <div className="text-xs text-gray-600">
+                  {issues.length === 1
+                    ? `"${issues[0].text}"`
+                    : `${issues.length} instances found`
+                  }
+                </div>
+                {issues[0]?.suggestion && (
+                  <div className="text-xs text-blue-600 mt-1">{issues[0].suggestion}</div>
                 )}
               </div>
             ))}
-            {analysis.issues.length > 10 && (
-              <div className="text-xs text-gray-500">
-                ... and {analysis.issues.length - 10} more
-              </div>
-            )}
           </div>
         </div>
 
