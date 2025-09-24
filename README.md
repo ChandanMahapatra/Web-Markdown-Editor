@@ -1,5 +1,7 @@
 # Web Markdown Editor
 
+<img width="1280" height="800" alt="Screen Shot 2025-09-24 at 10 55 27" src="https://github.com/user-attachments/assets/d5e14e58-b737-4caf-a5e6-cf82c6b58a74" />
+
 A privacy-first, local-first single-page Next.js markdown editor that runs entirely in the browser. Features instant local analysis, optional AI evaluation via configurable providers, and static export for GitHub Pages deployment.
 
 ## Features
