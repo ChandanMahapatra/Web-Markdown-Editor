@@ -52,14 +52,14 @@ export async function getProviders(): Promise<Provider[]> {
         name: 'LM Studio (Local)',
         apiKeyRequired: false,
         baseURL: 'http://localhost:1234/v1',
-        models: ['local-model']
+        models: ['google/gemma-3-12b']
       },
       {
         id: 'ollama',
         name: 'Ollama (Local)',
         apiKeyRequired: false,
         baseURL: 'http://localhost:11434/v1',
-        models: ['llama2', 'codellama', 'mistral']
+        models: ['gpt-oss:120b-cloud']
       }
     ];
 

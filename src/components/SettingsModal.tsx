@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { loadSettings, saveSettings } from '@/lib/storage';
+import { getProviders, Provider } from '@/lib/ai';
 
 interface SettingsModalProps {
   onClose: (saved?: boolean) => void;
@@ -14,6 +15,11 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
     apiKey: '',
     baseURL: '',
   });
+  const [providers, setProviders] = useState<Provider[]>([]);
+
+  useEffect(() => {
+    getProviders().then(setProviders);
+  }, []);
 
   useEffect(() => {
     loadSettings().then((loaded) => {
@@ -35,6 +41,24 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (settings.provider && providers.length > 0) {
+      const provider = providers.find(p => p.id === settings.provider);
+      if (provider) {
+        const updates: Partial<typeof settings> = {};
+        if (!settings.model || !provider.models.includes(settings.model)) {
+          updates.model = provider.models[0] || '';
+        }
+        if (!settings.baseURL || settings.baseURL === 'http://192.168.4.222:1234/v1') {
+          updates.baseURL = provider.baseURL || '';
+        }
+        if (Object.keys(updates).length > 0) {
+          setSettings(prev => ({ ...prev, ...updates }));
+        }
+      }
+    }
+  }, [settings.provider, providers]);
 
   const handleSave = async () => {
     await saveSettings(settings);
