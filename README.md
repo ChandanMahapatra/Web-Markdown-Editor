@@ -42,6 +42,8 @@ npm run build
 
 The `out/` directory contains the static files ready for deployment.
 
+**Note**: API routes in this project (proxy, test endpoints) are only available during local development with `npm run dev`. When deploying as a static site to GitHub Pages or similar platforms, these API routes are not available. Use cloud AI providers (OpenRouter, OpenAI, Anthropic) for full functionality in production deployments.
+
 ## AI Setup (Optional)
 
 The app supports optional AI evaluation for grammar, clarity, and overall quality. AI features are completely optional and run locally or through user-configured providers.
