@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { loadSettings, saveSettings } from '@/lib/storage';
+import { openDB } from 'idb';
 
 interface SettingsModalProps {
   onClose: (saved?: boolean) => void;
@@ -19,18 +20,18 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
     loadSettings().then((loaded) => {
       if (loaded) {
         setSettings({
-          provider: loaded.provider || 'lmstudio',
+          provider: loaded.provider || '',
           model: loaded.model || '',
           apiKey: loaded.apiKey || '',
-          baseURL: loaded.baseURL || 'http://192.168.4.222:1234/v1',
+          baseURL: loaded.baseURL || '',
         });
       } else {
-        // Default values
+        // Default values - no provider selected by default
         setSettings({
-          provider: 'lmstudio',
+          provider: '',
           model: '',
           apiKey: '',
-          baseURL: 'http://192.168.4.222:1234/v1',
+          baseURL: '',
         });
       }
     });
@@ -39,6 +40,25 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
   const handleSave = async () => {
     await saveSettings(settings);
     onClose(true);
+  };
+
+  const handleReset = async () => {
+    if (confirm('Are you sure you want to reset all settings? This will clear your API keys and provider configuration.')) {
+      try {
+        const db = await openDB('markdown-editor', 1);
+        await db.delete('settings', 'user-settings');
+        setSettings({
+          provider: '',
+          model: '',
+          apiKey: '',
+          baseURL: '',
+        });
+        onClose(false);
+      } catch (error) {
+        console.error('Failed to reset settings:', error);
+        alert('Failed to reset settings. Please try again.');
+      }
+    }
   };
 
   return (
@@ -59,6 +79,7 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
               <option value="">None (Local only)</option>
               <option value="openai">OpenAI</option>
               <option value="anthropic">Anthropic</option>
+              <option value="openrouter">OpenRouter</option>
               <option value="lmstudio">LM Studio (Local)</option>
               <option value="ollama">Ollama (Local)</option>
             </select>
@@ -74,12 +95,25 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
                 className="w-full border border-[var(--color-border-primary)] rounded px-3 py-2 text-[var(--color-text-primary)] bg-[var(--color-background-primary)]"
                 value={settings.model}
                 onChange={(e) => setSettings({ ...settings, model: e.target.value })}
-                placeholder="Enter model name"
+                placeholder={
+                  settings.provider === 'openrouter'
+                    ? 'e.g., anthropic/claude-3.5-sonnet, openai/gpt-4o'
+                    : settings.provider === 'openai'
+                    ? 'e.g., gpt-4, gpt-3.5-turbo'
+                    : settings.provider === 'anthropic'
+                    ? 'e.g., claude-3-sonnet, claude-3-haiku'
+                    : 'Enter model name'
+                }
               />
+              {settings.provider === 'openrouter' && (
+                <p className="text-xs text-[var(--color-text-secondary)] mt-1">
+                  Popular models: anthropic/claude-3.5-sonnet, openai/gpt-4o, google/gemini-pro-1.5
+                </p>
+              )}
             </div>
           )}
 
-          {(settings.provider === 'openai' || settings.provider === 'anthropic') && (
+          {(settings.provider === 'openai' || settings.provider === 'anthropic' || settings.provider === 'openrouter') && (
             <div>
               <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
                 API Key
@@ -122,19 +156,27 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
         </div>
 
-        <div className="flex justify-end gap-2 mt-6">
+        <div className="flex justify-between gap-2 mt-6">
           <button
-            onClick={() => onClose()}
-            className="px-4 py-2 bg-[var(--color-text-secondary)] text-[var(--color-accent-text)] rounded hover:bg-[var(--color-text-disabled)]"
+            onClick={handleReset}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
           >
-            Cancel
+            Reset Settings
           </button>
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 bg-[var(--color-accent-primary)] text-[var(--color-accent-text)] rounded hover:bg-[var(--color-accent-hover)]"
-          >
-            Save
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onClose()}
+              className="px-4 py-2 bg-[var(--color-text-secondary)] text-[var(--color-accent-text)] rounded hover:bg-[var(--color-text-disabled)]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-[var(--color-accent-primary)] text-[var(--color-accent-text)] rounded hover:bg-[var(--color-accent-hover)]"
+            >
+              Save
+            </button>
+          </div>
         </div>
       </div>
     </div>

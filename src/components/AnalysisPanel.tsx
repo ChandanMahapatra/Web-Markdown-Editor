@@ -61,11 +61,16 @@ export default function AnalysisPanel({ analysis, text, onHoverIssue, aiStatus }
         alert('Provider not found.');
         return;
       }
-      const result = await evaluateText(text, provider, settings.model || provider.models[0], settings.apiKey, settings.baseURL);
+      
+      const modelToUse = settings.model || provider.models[0];
+      console.log('Starting evaluation:', { provider: provider.id, model: modelToUse });
+      
+      const result = await evaluateText(text, provider, modelToUse, settings.apiKey, settings.baseURL);
       setEvaluation(result);
     } catch (error) {
       console.error('Evaluation failed:', error);
-      alert('Evaluation failed. Check your settings and try again.');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      alert(`Evaluation failed: ${errorMessage}\n\nCheck your console for more details.`);
     } finally {
       setIsEvaluating(false);
     }
