@@ -84,12 +84,10 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
               value={settings.provider}
               onChange={(e) => setSettings({ ...settings, provider: e.target.value })}
             >
-              <option value="">None (Local only)</option>
+              <option value="">None (No AI)</option>
               <option value="openai">OpenAI</option>
               <option value="anthropic">Anthropic</option>
               <option value="openrouter">OpenRouter</option>
-              <option value="lmstudio">LM Studio (Local)</option>
-              <option value="ollama">Ollama (Local)</option>
             </select>
           </div>
 
@@ -135,32 +133,6 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
               />
             </div>
           )}
-
-          {(settings.provider === 'lmstudio' || settings.provider === 'ollama') && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
-                  Base URL
-                </label>
-                <input
-                  type="text"
-                  className="w-full border border-[var(--color-border-primary)] rounded px-3 py-2 text-[var(--color-text-primary)] bg-[var(--color-background-primary)]"
-                  value={settings.baseURL}
-                  onChange={(e) => setSettings({ ...settings, baseURL: e.target.value })}
-                  placeholder="Enter base URL (e.g., http://localhost:1234)"
-                />
-              </div>
-              {typeof window !== 'undefined' && window.location.protocol === 'https:' && window.location.hostname !== 'localhost' && (
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                  <p className="text-sm text-yellow-800">
-                    ⚠️ <strong>Local models unavailable:</strong> This deployed HTTPS site cannot connect to HTTP local servers due to browser security restrictions. 
-                    Local models only work when running locally or with HTTPS-enabled local servers.
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-
 
         </div>
 

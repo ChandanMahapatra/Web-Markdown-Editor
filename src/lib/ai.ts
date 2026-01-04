@@ -23,10 +23,6 @@ export async function getProviders(): Promise<Provider[]> {
   if (providersCache) return providersCache;
 
   try {
-    const isDeployedHTTPS = typeof window !== 'undefined' && 
-      window.location.protocol === 'https:' && 
-      window.location.hostname !== 'localhost';
-
     const allProviders = [
       {
         id: 'openai',
@@ -48,26 +44,10 @@ export async function getProviders(): Promise<Provider[]> {
         apiKeyRequired: true,
         baseURL: 'https://openrouter.ai/api/v1',
         models: ['anthropic/claude-3.5-sonnet', 'openai/gpt-4o', 'openai/gpt-4-turbo', 'google/gemini-pro-1.5', 'meta-llama/llama-3.1-405b-instruct']
-      },
-      {
-        id: 'lmstudio',
-        name: 'LM Studio (Local)',
-        apiKeyRequired: false,
-        baseURL: 'http://localhost:1234/v1',
-        models: ['local-model']
-      },
-      {
-        id: 'ollama',
-        name: 'Ollama (Local)',
-        apiKeyRequired: false,
-        baseURL: 'http://localhost:11434/v1',
-        models: ['llama2', 'codellama', 'mistral']
       }
     ];
 
-    providersCache = isDeployedHTTPS 
-      ? allProviders.filter(p => !p.baseURL?.startsWith('http://'))
-      : allProviders;
+    providersCache = allProviders;
 
     return providersCache;
   } catch (error) {
@@ -111,33 +91,15 @@ export async function testConnection(
       });
       return response.ok;
     } else {
-      const isBrowser = typeof window !== 'undefined';
-      let fetchBase = effectiveBaseURL || '';
-      try {
-        if (isBrowser && effectiveBaseURL && effectiveBaseURL.startsWith('http://')) {
-          const u = new URL(effectiveBaseURL);
-          if (u.hostname === 'localhost' || u.hostname === '127.0.0.1' || u.hostname.startsWith('192.168.')) {
-            fetchBase = `/api/proxy?target=${encodeURIComponent(effectiveBaseURL)}`;
-          }
-        }
-      } catch {
-        return false;
-      }
-
-      const headers: Record<string, string> = {};
-      if (apiKey && apiKey.trim()) {
-        headers['Authorization'] = `Bearer ${apiKey}`;
-      }
-
-      const response = await fetch(`${fetchBase}/models`, {
+      if (!apiKey || !apiKey.trim()) return false;
+      const response = await fetch(`${effectiveBaseURL}/models`, {
         method: 'GET',
-        headers,
-      }).catch(err => {
-        console.error('Local provider connection failed:', err);
-        return null;
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
       });
-      
-      return response !== null && response.ok;
+      return response.ok;
     }
   } catch (error) {
     console.error('Connection test failed:', error);
@@ -256,28 +218,16 @@ ${text}`,
       const tokensUsed = data.usage?.total_tokens || 0;
       return { ...parseEvaluationResponse(content), timeTaken, tokensUsed };
     } else {
-      const isBrowser = typeof window !== 'undefined';
-      let fetchBase = effectiveBaseURL;
-      try {
-        if (isBrowser && effectiveBaseURL && effectiveBaseURL.startsWith('http://')) {
-          const u = new URL(effectiveBaseURL);
-          if (u.hostname === 'localhost' || u.hostname === '127.0.0.1' || u.hostname.startsWith('192.168.')) {
-            fetchBase = `/api/proxy?target=${encodeURIComponent(effectiveBaseURL)}`;
-          }
-        }
-      } catch {
+      if (!apiKey) {
+        throw new Error('API key is required');
       }
 
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      if (apiKey && apiKey.trim()) {
-        headers['Authorization'] = `Bearer ${apiKey}`;
-      }
-
-      const response = await fetch(`${fetchBase}/chat/completions`, {
+      const response = await fetch(`${effectiveBaseURL}/chat/completions`, {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
         body: JSON.stringify({
           model,
           messages: [
