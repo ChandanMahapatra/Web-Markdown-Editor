@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { testConnection } from '@/lib/ai';
+import { testConnection, Provider } from '@/lib/ai';
 
 export async function GET(req: Request) {
   try {
@@ -19,7 +19,7 @@ export async function GET(req: Request) {
       models: [],
     };
 
-    const ok = await testConnection(provider as any, apiKey, target);
+    const ok = await testConnection(provider as Provider, apiKey, target);
     return NextResponse.json({ ok });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });

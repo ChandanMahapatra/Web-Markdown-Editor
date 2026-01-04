@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AnalysisResult } from '@/lib/analysis';
 import { EvaluationResult, evaluateText, getProviders } from '@/lib/ai';
 import { loadSettings } from '@/lib/storage';
+import { event } from '@/lib/analytics';
 
 interface AnalysisPanelProps {
   analysis: AnalysisResult | null;
@@ -66,6 +67,9 @@ export default function AnalysisPanel({ analysis, text, onHoverIssue, aiStatus }
       console.log('Starting evaluation:', { provider: provider.id, model: modelToUse });
       
       const result = await evaluateText(text, provider, modelToUse, settings.apiKey, settings.baseURL);
+      
+      event('ai_evaluation_completed', 'ai_usage', provider.id);
+      
       setEvaluation(result);
     } catch (error) {
       console.error('Evaluation failed:', error);

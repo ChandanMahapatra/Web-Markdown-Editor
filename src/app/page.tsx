@@ -5,7 +5,7 @@ import Editor from '@/components/Editor';
 import AnalysisPanel from '@/components/AnalysisPanel';
 import SettingsModal from '@/components/SettingsModal';
 import { AnalysisResult } from '@/lib/analysis';
-import { EvaluationResult, getProviders, testConnection } from '@/lib/ai';
+import { getProviders, testConnection } from '@/lib/ai';
 import { downloadFile, markdownToHtml, exportToPdf } from '@/lib/export';
 import { loadSettings } from '@/lib/storage';
 
@@ -66,7 +66,6 @@ Feel free to edit this content or start fresh with your own writing!`);
   const [hoveredIssueType, setHoveredIssueType] = useState<string | null>(null);
   const [aiStatus, setAiStatus] = useState<'disconnected' | 'connected' | 'connecting'>('disconnected');
   const [isDark, setIsDark] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   const checkAIStatus = async () => {
     const settings = await loadSettings();
@@ -90,7 +89,6 @@ Feel free to edit this content or start fresh with your own writing!`);
     // Set initial theme based on system preference
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     setIsDark(mediaQuery.matches);
-    setMounted(true);
   }, []);
 
   useEffect(() => {

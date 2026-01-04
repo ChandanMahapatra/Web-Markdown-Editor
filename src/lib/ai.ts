@@ -120,7 +120,7 @@ export async function testConnection(
             fetchBase = `/api/proxy?target=${encodeURIComponent(effectiveBaseURL)}`;
           }
         }
-      } catch (e) {
+      } catch {
         return false;
       }
 
@@ -265,7 +265,7 @@ ${text}`,
             fetchBase = `/api/proxy?target=${encodeURIComponent(effectiveBaseURL)}`;
           }
         }
-      } catch (e) {
+      } catch {
       }
 
       const headers: Record<string, string> = {

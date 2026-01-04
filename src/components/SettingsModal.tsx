@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { loadSettings, saveSettings } from '@/lib/storage';
 import { openDB } from 'idb';
+import { event } from '@/lib/analytics';
 
 interface SettingsModalProps {
   onClose: (saved?: boolean) => void;
@@ -17,6 +18,8 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
   });
 
   useEffect(() => {
+    event('settings_modal_opened', 'engagement');
+    
     loadSettings().then((loaded) => {
       if (loaded) {
         setSettings({
@@ -39,6 +42,11 @@ export default function SettingsModal({ onClose }: SettingsModalProps) {
 
   const handleSave = async () => {
     await saveSettings(settings);
+    
+    if (settings.provider) {
+      event('ai_provider_selected', 'ai_setup', settings.provider);
+    }
+    
     onClose(true);
   };
 

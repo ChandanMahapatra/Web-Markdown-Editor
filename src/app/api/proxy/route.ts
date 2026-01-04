@@ -34,7 +34,7 @@ async function proxyRequest(req: Request) {
     let target: URL;
     try {
       target = new URL(targetParam);
-    } catch (e) {
+    } catch {
       return new NextResponse(JSON.stringify({ error: 'Invalid target URL' }), {
         status: 400,
         headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
