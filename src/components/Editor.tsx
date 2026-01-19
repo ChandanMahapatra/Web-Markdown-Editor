@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { EditorView, keymap, highlightSpecialChars, drawSelection, highlightActiveLine, dropCursor, rectangularSelection, crosshairCursor, highlightActiveLineGutter, Decoration, DecorationSet, ViewPlugin, ViewUpdate } from '@codemirror/view';
+import { EditorView, keymap, highlightSpecialChars, drawSelection, highlightActiveLine, dropCursor, rectangularSelection, crosshairCursor, highlightActiveLineGutter } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 import { foldGutter, indentOnInput, syntaxHighlighting, bracketMatching, foldKeymap, HighlightStyle } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
@@ -116,6 +116,7 @@ export default function Editor({ value, onChange, isPreview, onAnalysisUpdate, h
     return () => {
       view.destroy();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPreview]);
 
   useEffect(() => {
