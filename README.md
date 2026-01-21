@@ -42,8 +42,6 @@ npm run build
 
 The `out/` directory contains the static files ready for deployment.
 
-**Note**: API routes in this project (proxy, test endpoints) are only available during local development with `npm run dev`. When deploying as a static site to GitHub Pages or similar platforms, these API routes are not available. Use cloud AI providers (OpenRouter, OpenAI, Anthropic) for full functionality in production deployments.
-
 ## AI Setup (Optional)
 
 The app supports optional AI evaluation for grammar, clarity, and overall quality. AI features are completely optional and run locally or through user-configured providers.
@@ -83,16 +81,14 @@ For maximum privacy, use LM Studio to run AI models locally. **Note**: Local AI 
    - Click "Evaluate with AI" in the Analysis panel
    - Get grammar, clarity scores and suggestions
 
-### Cloud AI Providers
+### Other Providers
 
-The app also supports cloud AI providers for evaluation:
-- **OpenRouter**: Requires API key, access to multiple models from one key (get it from [openrouter.ai](https://openrouter.ai))
-  - Popular models: `anthropic/claude-3.5-sonnet`, `openai/gpt-4o`, `google/gemini-pro-1.5`
+The app also supports:
 - **OpenAI**: Requires API key, connects to OpenAI's servers
 - **Anthropic**: Requires API key, connects to Anthropic's servers
 - **Ollama**: Local models via Ollama (alternative to LM Studio)
 
-All AI evaluations are processed client-side or through direct API calls - no data is sent to external analytics services (unless you configure Google Analytics).
+All AI evaluations are processed client-side or through direct API calls - no data is sent to external analytics services.
 
 ### HTTPS Mixed Content Limitation
 
@@ -108,41 +104,6 @@ All AI evaluations are processed client-side or through direct API calls - no da
 2. **mkcert**: Use mkcert to create local SSL certificates for LM Studio/Ollama
 3. **Development Mode**: Use the local development server for local AI features
 
-## Google Analytics Configuration (Optional)
-
-The app supports Google Analytics 4 to track:
-- Page views and visitor statistics
-- User location (via Google Analytics)
-- Settings modal opens
-- AI provider selection and usage
-
-### Setup
-
-1. **Create a Google Analytics Property**:
-   - Go to [Google Analytics](https://analytics.google.com/)
-   - Create a new property (Web)
-   - Get your Measurement ID (starts with "G-")
-
-2. **Configure Environment Variable**:
-   - Create a `.env.local` file in the project root
-   - Add your GA Measurement ID:
-   ```
-   NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
-   ```
-
-3. **Restart Development Server**:
-   ```bash
-   npm run dev
-   ```
-
-### Tracked Events
-
-- `settings_modal_opened`: User opens settings modal
-- `ai_provider_selected`: User selects an AI provider (label shows provider name)
-- `ai_evaluation_completed`: User completes an AI evaluation (label shows provider ID)
-
-**Note**: Analytics is completely optional. If `NEXT_PUBLIC_GA_MEASUREMENT_ID` is not set, no tracking code will run.
-
 ## Architecture
 
 - **Frontend**: Next.js 15 with App Router, configured for static export
@@ -150,9 +111,8 @@ The app supports Google Analytics 4 to track:
 - **Styling**: Tailwind CSS
 - **Storage**: IndexedDB via idb library
 - **Analysis**: Custom TypeScript algorithms for real-time text analysis
-- **AI Integration**: Client-side provider wrappers for OpenRouter, Anthropic, OpenAI, and local models
+- **AI Integration**: Client-side provider wrappers (currently mocked)
 - **Export**: jsPDF + html2canvas for PDF, custom HTML generation
-- **Analytics**: Google Analytics 4 for optional visitor and usage tracking
 
 ## Deployment
 
@@ -165,11 +125,10 @@ This app is designed for static hosting on GitHub Pages:
 ## Privacy & Security
 
 - **No Telemetry**: Next.js telemetry is disabled in development and build scripts
-- **Optional Analytics**: Google Analytics can be configured via environment variable (off by default)
-- **No external calls without explicit user consent**
-- **All analysis runs locally in browser**
-- **AI features require user to configure providers and accept terms**
-- **Documents stored locally in IndexedDB (no cloud sync)**
+- No external calls without explicit user consent
+- All analysis runs locally in the browser
+- AI features require user to configure providers and accept terms
+- Documents stored locally in IndexedDB (no cloud sync)
 
 ## Browser Support
 
